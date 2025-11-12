@@ -7,6 +7,9 @@ import { supabase, type Product } from "@/lib/supabase";
 import { CATEGORIES, toSlug } from "@/lib/categories";
 import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { useEffect, useMemo, useState } from "react";
+import { useCart } from "@/contexts/CartContext";
+import { useToast } from "@/hooks/use-toast";
+import { ShoppingCart } from "lucide-react";
 
 const PAGE_SIZE = 9;
 // Categories imported from shared lib
@@ -15,10 +18,20 @@ const Products = () => {
   const params = useParams();
   const navigate = useNavigate();
   const [sp, setSp] = useSearchParams();
+  const { addToCart } = useCart();
+  const { toast } = useToast();
 
   const [loading, setLoading] = useState(true);
   const [items, setItems] = useState<Product[]>([]);
   const [total, setTotal] = useState(0);
+
+  const handleAddToCart = (product: Product) => {
+    addToCart(product, 1);
+    toast({
+      title: "Added to cart!",
+      description: `${product.name} added to your cart.`,
+    });
+  };
 
   const q = sp.get("q") || "";
   const page = Number(sp.get("page") || "1");
@@ -123,9 +136,20 @@ const Products = () => {
               </div>
               <div className="p-6">
                 <div className="text-sm text-muted-foreground mb-2">{p.category}</div>
-                <h3 className="font-semibold mb-2">{p.name}</h3>
-                <div className="font-bold text-secondary mb-4">Kshs{Number(p.price).toLocaleString()}</div>
-                <Button asChild className="w-full rounded-xl"><Link to={`/product/${p.id}`}>View Product</Link></Button>
+                <h3 className="font-semibold mb-2 line-clamp-2">{p.name}</h3>
+                <div className="font-bold text-blue-600 mb-4 text-lg">KSH {Number(p.price).toFixed(2)}</div>
+                <div className="flex gap-2">
+                  <Button 
+                    onClick={() => handleAddToCart(p)}
+                    className="flex-1 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 rounded-xl"
+                  >
+                    <ShoppingCart className="h-4 w-4 mr-2" />
+                    Add
+                  </Button>
+                  <Button asChild variant="outline" className="flex-1 rounded-xl">
+                    <Link to={`/product/${p.id}`}>View</Link>
+                  </Button>
+                </div>
               </div>
             </div>
           ))}

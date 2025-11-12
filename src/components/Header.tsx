@@ -3,11 +3,16 @@ import { Search, ShoppingCart, User, Menu, X, Phone } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Link, useNavigate } from "react-router-dom";
+import { useCart } from "@/contexts/CartContext";
 
 const Header = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [search, setSearch] = useState("");
   const navigate = useNavigate();
+  const { getCartTotal, getCartCount } = useCart();
+  
+  const cartTotal = getCartTotal();
+  const cartCount = getCartCount();
 
   const navigationItems = [
     { label: "HOME", to: "/" },
@@ -98,11 +103,18 @@ const Header = () => {
               </div>
             </div>
             
-            <Button variant="secondary" className="bg-secondary hover:bg-secondary-light rounded-xl px-6">
-              <ShoppingCart className="h-4 w-4 mr-2" />
-              <span className="hidden md:inline">KSH50.00</span>
-              <span className="md:hidden">0</span>
-            </Button>
+            <Link to="/cart">
+              <Button variant="secondary" className="bg-secondary hover:bg-secondary-light rounded-xl px-6 relative">
+                <ShoppingCart className="h-4 w-4 mr-2" />
+                <span className="hidden md:inline">KSH {cartTotal.toFixed(2)}</span>
+                <span className="md:hidden">{cartCount}</span>
+                {cartCount > 0 && (
+                  <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold">
+                    {cartCount}
+                  </span>
+                )}
+              </Button>
+            </Link>
 
             {/* Mobile menu button */}
             <Button

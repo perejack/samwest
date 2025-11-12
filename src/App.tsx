@@ -25,18 +25,21 @@ import Wholesale from "./pages/Wholesale";
 import Partnership from "./pages/Partnership";
 import Careers from "./pages/Careers";
 import Blog from "./pages/Blog";
+import Cart from "./pages/Cart";
 import FloatingWhatsApp from "@/components/FloatingWhatsApp";
 import ScrollToTop from "@/components/ScrollToTop";
+import { CartProvider } from "@/contexts/CartContext";
 
 const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <ScrollToTop />
+      <CartProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <ScrollToTop />
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/product/:id" element={<ProductDetails />} />
@@ -60,11 +63,13 @@ const App = () => (
           <Route path="/partnership" element={<Partnership />} />
           <Route path="/careers" element={<Careers />} />
           <Route path="/blog" element={<Blog />} />
+          <Route path="/cart" element={<Cart />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
-        <FloatingWhatsApp />
-      </BrowserRouter>
+          <FloatingWhatsApp />
+        </BrowserRouter>
+      </CartProvider>
     </TooltipProvider>
   </QueryClientProvider>
 );

@@ -2,13 +2,18 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Minus, Plus, Heart, Phone, MessageCircle } from "lucide-react";
-import { useParams, Link } from "react-router-dom";
+import { Minus, Plus, Heart, Phone, MessageCircle, ShoppingCart } from "lucide-react";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import { useEffect, useRef, useState, useMemo } from "react";
 import { supabase, type Product } from "@/lib/supabase";
+import { useCart } from "@/contexts/CartContext";
+import { useToast } from "@/hooks/use-toast";
 
 const ProductDetails = () => {
   const { id } = useParams();
+  const navigate = useNavigate();
+  const { toast } = useToast();
+  const { addToCart } = useCart();
   const [qty, setQty] = useState(1);
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
@@ -16,6 +21,23 @@ const ProductDetails = () => {
   const [loadingRelated, setLoadingRelated] = useState(false);
   const railRef = useRef<HTMLDivElement | null>(null);
   const PHONE = "+254729000788";
+
+  const handleAddToCart = () => {
+    if (product) {
+      addToCart(product, qty);
+      toast({
+        title: "Added to cart!",
+        description: `${qty} × ${product.name} added to your cart.`,
+      });
+    }
+  };
+
+  const handleBuyNow = () => {
+    if (product) {
+      addToCart(product, qty);
+      navigate("/cart");
+    }
+  };
 
   const waLink = useMemo(() => {
     const url = typeof window !== "undefined" ? window.location.href : "";
@@ -109,15 +131,34 @@ const ProductDetails = () => {
                   </div>
                 )}
 
-                <div className="flex items-center gap-3 mb-6">
-                  <div className="flex items-center border rounded-xl">
-                    <Button variant="ghost" size="icon" onClick={() => setQty(Math.max(1, qty-1))}><Minus /></Button>
-                    <div className="w-10 text-center">{qty}</div>
-                    <Button variant="ghost" size="icon" onClick={() => setQty(qty+1)}><Plus /></Button>
+                <div className="space-y-4 mb-6">
+                  <div className="flex items-center gap-3">
+                    <div className="flex items-center border rounded-xl">
+                      <Button variant="ghost" size="icon" onClick={() => setQty(Math.max(1, qty-1))}><Minus /></Button>
+                      <div className="w-10 text-center font-semibold">{qty}</div>
+                      <Button variant="ghost" size="icon" onClick={() => setQty(qty+1)}><Plus /></Button>
+                    </div>
+                    <div className="text-sm text-muted-foreground">
+                      Total: <span className="font-bold text-blue-600">KSH {(Number(product.price) * qty).toFixed(2)}</span>
+                    </div>
                   </div>
-                  <Button className="rounded-xl">Add to cart</Button>
-                  <Button variant="secondary" className="rounded-xl">Buy now</Button>
-                  <Button variant="outline" className="rounded-xl"><Heart className="mr-2"/>Wishlist</Button>
+                  
+                  <div className="flex flex-wrap gap-2">
+                    <Button 
+                      onClick={handleAddToCart}
+                      className="flex-1 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 rounded-xl py-6 text-base"
+                    >
+                      <ShoppingCart className="mr-2 h-5 w-5" />
+                      Add to Cart
+                    </Button>
+                    <Button 
+                      onClick={handleBuyNow}
+                      variant="secondary" 
+                      className="flex-1 rounded-xl py-6 text-base"
+                    >
+                      Buy Now
+                    </Button>
+                  </div>
                 </div>
 
                 {/* Call / WhatsApp Order CTA */}
